@@ -1,3 +1,4 @@
+const _ = require('lodash');
 const {ObjectID} = require('mongodb');
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -57,6 +58,32 @@ app.delete('/courses/:id', (req, res) => {
   }
 
   Course.findByIdAndRemove(id).then((course) => {
+    if(!course) {
+      return res.status(404).send();
+    }
+
+    res.send({course});
+  }).catch((e) => {
+    res.status(400).send();
+  })
+});
+
+app.patch('/courses/:id', (req, res) => {
+  var id = req.params.id;
+  var body = _.pick(req.body, ['name', 'completed']);
+
+  if(!ObjectID.isValid(id)) {
+    return res.status(404).send();
+  }
+
+  if(_.isBoolean(body.completed) && body.completed) {
+    body.completedAt = new Date().getTime();
+  } else {
+    body.completed = false;
+    body.completedAt = null;
+  }
+
+  Course.findByIdAndUpdate(id, {$set: body}, {new: true}).then((course) => {
     if(!course) {
       return res.status(404).send();
     }
