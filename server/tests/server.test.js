@@ -1,12 +1,15 @@
 const expect = require('expect');
 const request = require('supertest');
+const {ObjectID} = require('mongodb');
 
 const {app} = require('./../server');
 const {Course} = require('./../models/course');
 
 const courses = [{
+  _id: new ObjectID,
   name: 'chemO'
 }, {
+  _id: new ObjectID,
   name: 'Bruh'
 }];
 
@@ -67,4 +70,32 @@ describe('GET /courses', () => {
       })
       .end(done);
   });
-})
+});
+
+describe('GET /courses:id', () => {
+  it('should return a courses', (done) => {
+    request(app)
+      .get(`/courses/${courses[0]._id.toHexString()}`)
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.course.name).toBe(courses[0].name);
+      })
+      .end(done);
+  });
+
+  it('should return 404 if a course not found', (done) => {
+    var hexId = new ObjectID().toHexString();
+
+    request(app)
+      .get(`/courses/${hexId}`)
+      .expect(404)
+      .end(done)
+  });
+
+  it('should return 404 for a non object id', (done) => {
+    request(app)
+      .get('/courses/123')
+      .expect(404)
+      .end(done)
+  })
+});
