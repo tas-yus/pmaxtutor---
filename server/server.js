@@ -22,6 +22,14 @@ app.post('/courses', (req, res) => {
   });
 });
 
+app.get('/courses', (req, res) => {
+  Course.find().then((courses) => {
+    res.send({courses});
+  }, (e) => {
+    res.status(400).send(e);
+  });
+});
+
 app.listen(3000, () => {
   console.log('Started on port 3000');
 });
