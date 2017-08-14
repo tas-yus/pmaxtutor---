@@ -15,7 +15,6 @@ var Course = mongoose.model('Course', {
   },
   expiredAt: {
     type: Number,
-    // add a default like 3 months from created date
     default: new Date().getTime() + COURSE_LIFE
   },
   completedAt: {
