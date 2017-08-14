@@ -10,7 +10,9 @@ const courses = [{
   name: 'chemO'
 }, {
   _id: new ObjectID,
-  name: 'Bruh'
+  name: 'Bruh',
+  completed: true,
+  completed: 333
 }];
 
 beforeEach((done) => {
@@ -137,4 +139,44 @@ describe('DELETE /courses/:id', () => {
       .expect(404)
       .end(done)
   });
+});
+
+describe('PATCH /courses/:id', () => {
+  it('should update the course', (done) => {
+      var hexId = courses[0]._id.toHexString();
+      var name = 'chemOLAA'
+
+      request(app)
+        .patch(`/courses/${hexId}`)
+        .send({
+          completed: true,
+          name
+        })
+        .expect(200)
+        .expect((res) => {
+          expect(res.body.course.name).toBe(name);
+          expect(res.body.course.completed).toBe(true);
+          expect(res.body.course.completedAt).toBeA('number');
+        })
+        .end(done)
+  });
+
+  it('should clear completedAt when course is not completed', (done) => {
+      var hexId = courses[1]._id.toHexString();
+      var name = 'Hello';
+
+      request(app)
+        .patch(`/courses/${hexId}`)
+        .send({
+          completed: false,
+          name
+        })
+        .expect(200)
+        .expect((res) => {
+          expect(res.body.course.name).toBe(name);
+          expect(res.body.course.completed).toBe(false);
+          expect(res.body.course.completedAt).toNotExist();
+        })
+        .end(done)
+  })
 });
