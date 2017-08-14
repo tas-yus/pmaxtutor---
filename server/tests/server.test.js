@@ -72,8 +72,8 @@ describe('GET /courses', () => {
   });
 });
 
-describe('GET /courses:id', () => {
-  it('should return a courses', (done) => {
+describe('GET /courses/:id', () => {
+  it('should return a course', (done) => {
     request(app)
       .get(`/courses/${courses[0]._id.toHexString()}`)
       .expect(200)
@@ -98,4 +98,43 @@ describe('GET /courses:id', () => {
       .expect(404)
       .end(done)
   })
+});
+
+describe('DELETE /courses/:id', () => {
+  it('should delete a course', (done) => {
+    var hexId = courses[1]._id.toHexString();
+
+    request(app)
+      .delete(`/courses/${hexId}`)
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.course._id).toBe(hexId);
+      })
+      .end((err, res) => {
+        if(err) {
+          return done(err);
+        }
+
+        Course.findById(hexId).then((course) => {
+          expect(course).toNotExist();
+          done();
+        }).catch((e) => done());
+      });
+  });
+
+  it('should return 404 if a course not found', (done) => {
+    var hexId = new ObjectID().toHexString();
+
+    request(app)
+      .delete(`/courses/${hexId}`)
+      .expect(404)
+      .end(done)
+  });
+
+  it('should return 404 for a non object id', (done) => {
+    request(app)
+      .delete('/courses/123')
+      .expect(404)
+      .end(done)
+  });
 });
