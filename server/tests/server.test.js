@@ -4,8 +4,16 @@ const request = require('supertest');
 const {app} = require('./../server');
 const {Course} = require('./../models/course');
 
+const courses = [{
+  name: 'chemO'
+}, {
+  name: 'Bruh'
+}];
+
 beforeEach((done) => {
-  Course.remove({}).then(() => done());
+  Course.remove({}).then(() => {
+    return Course.insertMany(courses);
+  }).then(() => done());
 });
 
 describe('POST /courses', () => {
@@ -24,7 +32,7 @@ describe('POST /courses', () => {
           return done(err);
         }
 
-        Course.find().then((courses) => {
+        Course.find({name}).then((courses) => {
           expect(courses.length).toBe(1);
           expect(courses[0].name).toBe(name);
           done();
@@ -42,9 +50,21 @@ describe('POST /courses', () => {
           }
 
           Course.find().then((courses) => {
-            expect(courses.length).toBe(0);
+            expect(courses.length).toBe(2);
             done();
           }).catch((e) => done(e));
         })
   });
 });
+
+describe('GET /courses', () => {
+  it('should return all courses', (done) => {
+    request(app)
+      .get('/courses')
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.courses.length).toBe(2);
+      })
+      .end(done);
+  });
+})
