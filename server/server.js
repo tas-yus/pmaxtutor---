@@ -1,4 +1,4 @@
-const {MongoClient, ObjectID} = require('mongodb');
+const {ObjectID} = require('mongodb');
 const express = require('express');
 const bodyParser = require('body-parser');
 
@@ -28,6 +28,24 @@ app.get('/courses', (req, res) => {
   }, (e) => {
     res.status(400).send(e);
   });
+});
+
+app.get('/courses/:id', (req, res) => {
+  var id = req.params.id;
+
+  if(!ObjectID.isValid(id)) {
+    return res.status(404).send();
+  }
+
+  Course.findById(id).then((course) => {
+    if(!course) {
+      return res.status(404).send();
+    }
+
+    res.send({course});
+  }).catch((e) => {
+    res.status(400).send();
+  })
 });
 
 app.listen(3000, () => {
