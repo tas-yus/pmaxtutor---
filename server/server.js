@@ -18,9 +18,14 @@ const port = process.env.PORT;
 hbs.registerPartials(__dirname + '/../views/partials');
 app.set('view engine', 'hbs');
 
+app.use(bodyParser.urlencoded({
+    extended: true
+}));
+
 app.use(bodyParser.json());
 
 app.use(express.static(__dirname + '/public'));
+
 
 /*
 ================================
@@ -51,15 +56,21 @@ app.get('/', (req, res) => {
 
 app.get('/about', (req, res) => {
   res.render('about.hbs', {
-    pageTitle: 'About Page',
+    pageTitle: 'About Page'
   });
 });
 
 app.get('/projects', (req, res) => {
   res.render('projects.hbs', {
-    pageTitle: 'Projects',
+    pageTitle: 'Projects'
   });
 });
+
+app.get('/login', (req, res) => {
+  res.render('login.hbs', {
+    pageTitle: 'Login'
+  });
+})
 
 /*
 ================================
@@ -171,7 +182,6 @@ app.get('/users/me', authenticate, (req, res) => {
 
 app.post('/users/login', (req, res) => {
   var body = _.pick(req.body, ['email', 'password']);
-
   User.findByCredentials(body.email, body.password).then((user) => {
     return user.generateAuthToken().then((token) => {
       res.header('x-auth', token).send(user);
