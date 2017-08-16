@@ -8,12 +8,14 @@ const userTwoId = new ObjectID();
 
 const courses = [{
   _id: new ObjectID,
-  name: 'chemO'
+  name: 'chemO',
+  student: userOneId
 }, {
   _id: new ObjectID,
   name: 'Bruh',
   completed: true,
-  completed: 333
+  completed: 333,
+  student: userTwoId
 }];
 
 const users = [{

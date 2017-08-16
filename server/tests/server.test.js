@@ -16,6 +16,7 @@ describe('POST /courses', () => {
 
     request(app)
       .post('/courses')
+      .set('x-auth', users[0].tokens[0].token)
       .send({name})
       .expect(200)
       .expect((res) => {
@@ -37,6 +38,8 @@ describe('POST /courses', () => {
   it('should not create a course with invalid body data', (done) => {
       request(app)
         .post('/courses')
+        .set('x-auth', users[0].tokens[0].token)
+        .send({})
         .expect(400)
         .end((err, res) => {
           if (err) {
@@ -55,9 +58,10 @@ describe('GET /courses', () => {
   it('should return all courses', (done) => {
     request(app)
       .get('/courses')
+      .set('x-auth', users[0].tokens[0].token)
       .expect(200)
       .expect((res) => {
-        expect(res.body.courses.length).toBe(2);
+        expect(res.body.courses.length).toBe(1);
       })
       .end(done);
   });

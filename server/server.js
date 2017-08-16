@@ -4,6 +4,8 @@ const _ = require('lodash');
 const {ObjectID} = require('mongodb');
 const express = require('express');
 const bodyParser = require('body-parser');
+const hbs = require('hbs');
+const fs = require('fs');
 
 const {mongoose} = require('./db/mongoose');
 const {Course} = require('./models/course');
@@ -13,11 +15,62 @@ const {authenticate} = require('./middleware/authenticate');
 var app = express();
 const port = process.env.PORT;
 
+hbs.registerPartials(__dirname + '/../views/partials');
+app.set('view engine', 'hbs');
+
 app.use(bodyParser.json());
 
-app.post('/courses', (req, res) => {
+app.use(express.static(__dirname + '/public'));
+
+/*
+================================
+Helper
+================================
+*/
+
+hbs.registerHelper('getCurrentYear', () => {
+  return new Date().getFullYear();
+});
+
+hbs.registerHelper('screamIt', (text) => {
+  return text.toUpperCase();
+});
+
+/*
+================================
+Regular
+================================
+*/
+
+app.get('/', (req, res) => {
+  res.render('home.hbs', {
+    pageTitle: 'Home Page',
+    welcomeMessage: 'Hello World!'
+  });
+});
+
+app.get('/about', (req, res) => {
+  res.render('about.hbs', {
+    pageTitle: 'About Page',
+  });
+});
+
+app.get('/projects', (req, res) => {
+  res.render('projects.hbs', {
+    pageTitle: 'Projects',
+  });
+});
+
+/*
+================================
+Login Route
+================================
+*/
+
+app.post('/courses', authenticate, (req, res) => {
   var course = new Course({
-    name: req.body.name
+    name: req.body.name,
+    student: req.user._id
   });
 
   course.save().then((doc) => {
@@ -27,8 +80,10 @@ app.post('/courses', (req, res) => {
   });
 });
 
-app.get('/courses', (req, res) => {
-  Course.find().then((courses) => {
+app.get('/courses', authenticate, (req, res) => {
+  Course.find({
+    student: req.user._id
+  }).then((courses) => {
     res.send({courses});
   }, (e) => {
     res.status(400).send(e);
@@ -107,7 +162,7 @@ app.post('/users', (req, res) => {
     res.header('x-auth', token).send(user);
   }).catch((e) => {
     res.status(400).send(e);
-  })
+  });
 });
 
 app.get('/users/me', authenticate, (req, res) => {

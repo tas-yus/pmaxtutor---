@@ -20,6 +20,10 @@ var Course = mongoose.model('Course', {
   completedAt: {
     type: Number,
     default: null
+  },
+  student: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true
   }
 });
 
