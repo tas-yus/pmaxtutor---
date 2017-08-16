@@ -164,7 +164,7 @@ app.patch('/courses/:id', (req, res) => {
 });
 
 app.post('/users', (req, res) => {
-  var body = _.pick(req.body, ['email', 'password']);
+  var body = _.pick(req.body, ['email', 'password', 'username']);
   var user = new User(body);
 
   user.save().then(() => {
@@ -177,23 +177,31 @@ app.post('/users', (req, res) => {
 });
 
 app.get('/users/me', authenticate, (req, res) => {
-  res.send(req.user);
+  res.header('x-auth', req.query.valid);
+  res.render('dashboard.hbs', {
+    pageTitle: 'Dashboard',
+    welcomeMessage: `Hello ${req.user.username}`
+  });
 });
 
 app.post('/users/login', (req, res) => {
   var body = _.pick(req.body, ['email', 'password']);
   User.findByCredentials(body.email, body.password).then((user) => {
     return user.generateAuthToken().then((token) => {
-      res.header('x-auth', token).send(user);
+      var string = encodeURIComponent(token);
+      //fix this query string based authentication***
+      res.header('x-auth', token).redirect(303, `/users/me?valid=${string}`);
     });
   }).catch((e) => {
-    res.status(400).send();
+    res.redirect('back');
   });
 });
 
-app.delete('/users/me/token', authenticate, (req, res) => {
+//YET TO BE FIXED!!!!
+app.post('/users/me/token', authenticate, (req, res) => {
   req.user.removeToken(req.token).then(() => {
     res.status(200).send();
+    res.redirect(303, '/');
   }, () => {
     res.status(400).send();
   });

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Some Website</title>
+  </head>
+  <body>
+    {{> header}}
+    <p>{{screamIt welcomeMessage}}</p>
+
+    <form action="/users/me/token" method="POST">
+      <input name="submit2" type="submit" id="submit2" value="log out">
+    </form>
+    {{> footer}}
+  </body>
+</html>
